@@ -1,0 +1,3122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Chronoflow Planner &amp; To-Do</title>
+    <meta name="description" content="A modern, aesthetic To-Do List and Daily Time-Block Planner with custom reminders, hourly scheduling, and persistent local storage." />
+    <meta property="og:title" content="Chronoflow Planner &amp; To-Do" />
+    <meta property="og:description" content="A modern, aesthetic To-Do List and Daily Time-Block Planner with custom reminders, hourly scheduling, and persistent local storage." />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+
+    <!-- Google Fonts & Font Awesome Icons CDN -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" integrity="sha512-DTOQO9RWCH3ppGqcWaEA1BIZOC6xxalwEsw9c2QQeAIftl+Vegovlnee1c9QX4TctnWMn13TZye+giMm8e2LwA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+    <style>
+      :root {
+        --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        --font-mono: 'JetBrains Mono', monospace;
+
+        /* Light Palette (Warm Soft Neutrals & Refined Slate) */
+        --bg-main: #f8f9fa;
+        --bg-surface: #ffffff;
+        --bg-surface-subtle: #f1f3f5;
+        --bg-card: #ffffff;
+        --border-color: #e9ecef;
+        --border-subtle: #edf2f7;
+        --text-primary: #1e293b;
+        --text-secondary: #64748b;
+        --text-muted: #94a3b8;
+        
+        --primary: #4f46e5;
+        --primary-hover: #4338ca;
+        --primary-light: #eef2ff;
+        --primary-border: #c7d2fe;
+
+        --accent-amber: #f59e0b;
+        --accent-amber-light: #fef3c7;
+        --accent-emerald: #10b981;
+        --accent-emerald-light: #d1fae5;
+        --accent-rose: #f43f5e;
+        --accent-rose-light: #ffe4e6;
+        --accent-sky: #0284c7;
+        --accent-sky-light: #e0f2fe;
+
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.04);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
+
+        --radius-sm: 8px;
+        --radius-md: 12px;
+        --radius-lg: 18px;
+        --radius-full: 9999px;
+      }
+
+      [data-theme="dark"] {
+        /* Dark Palette (Sophisticated Obsidian / Zinc) */
+        --bg-main: #0f172a;
+        --bg-surface: #1e293b;
+        --bg-surface-subtle: #334155;
+        --bg-card: #1e293b;
+        --border-color: #334155;
+        --border-subtle: #1e293b;
+        --text-primary: #f8fafc;
+        --text-secondary: #94a3b8;
+        --text-muted: #64748b;
+        
+        --primary: #6366f1;
+        --primary-hover: #4f46e5;
+        --primary-light: rgba(99, 102, 241, 0.15);
+        --primary-border: rgba(99, 102, 241, 0.35);
+
+        --accent-amber: #fbbf24;
+        --accent-amber-light: rgba(245, 158, 11, 0.18);
+        --accent-emerald: #34d399;
+        --accent-emerald-light: rgba(16, 185, 129, 0.18);
+        --accent-rose: #fb7185;
+        --accent-rose-light: rgba(244, 63, 94, 0.18);
+        --accent-sky: #38bdf8;
+        --accent-sky-light: rgba(2, 132, 199, 0.18);
+
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5);
+        --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.6);
+      }
+
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+
+      body {
+        font-family: var(--font-main);
+        background-color: var(--bg-main);
+        color: var(--text-primary);
+        line-height: 1.5;
+        min-height: 100vh;
+        transition: background-color 0.25s ease, color 0.25s ease;
+        -webkit-font-smoothing: antialiased;
+        overflow-x: hidden;
+      }
+
+      /* App Shell Layout */
+      .app-layout {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+      }
+
+      @media (min-width: 1024px) {
+        .app-layout {
+          flex-direction: row;
+        }
+      }
+
+      /* Sidebar Navigation */
+      .sidebar {
+        width: 100%;
+        background-color: var(--bg-surface);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        z-index: 40;
+        transition: background-color 0.25s ease, border-color 0.25s ease;
+      }
+
+      @media (min-width: 1024px) {
+        .sidebar {
+          width: 290px;
+          min-height: 100vh;
+          position: sticky;
+          top: 0;
+          height: 100vh;
+          border-bottom: none;
+          border-right: 1px solid var(--border-color);
+          padding: 1.75rem 1.25rem;
+        }
+      }
+
+      .sidebar-top {
+        display: flex;
+        flex-direction: column;
+        gap: 1.75rem;
+      }
+
+      .logo-area {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+      }
+
+      .logo-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: var(--radius-md);
+        background: linear-gradient(135deg, #4f46e5, #06b6d4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #ffffff;
+        font-size: 1.2rem;
+        box-shadow: 0 4px 12px rgba(79, 70, 229, 0.3);
+      }
+
+      .logo-text h1 {
+        font-size: 1.15rem;
+        font-weight: 700;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
+      }
+
+      .logo-text p {
+        font-size: 0.75rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+      }
+
+      /* Nav links */
+      .nav-menu {
+        display: flex;
+        gap: 0.5rem;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+      }
+
+      @media (min-width: 1024px) {
+        .nav-menu {
+          flex-direction: column;
+          gap: 0.4rem;
+          overflow-x: visible;
+        }
+      }
+
+      .nav-btn {
+        display: flex;
+        align-items: center;
+        gap: 0.85rem;
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        background: transparent;
+        border: none;
+        color: var(--text-secondary);
+        font-family: inherit;
+        font-size: 0.92rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+        text-align: left;
+        width: 100%;
+        position: relative;
+      }
+
+      .nav-btn:hover {
+        background-color: var(--bg-surface-subtle);
+        color: var(--text-primary);
+      }
+
+      .nav-btn.active {
+        background-color: var(--primary-light);
+        color: var(--primary);
+        font-weight: 700;
+      }
+
+      .nav-btn i {
+        font-size: 1.05rem;
+        width: 20px;
+        text-align: center;
+      }
+
+      .badge-count {
+        margin-left: auto;
+        font-size: 0.72rem;
+        font-weight: 700;
+        padding: 0.15rem 0.55rem;
+        border-radius: var(--radius-full);
+        background-color: var(--bg-surface-subtle);
+        color: var(--text-secondary);
+      }
+
+      .nav-btn.active .badge-count {
+        background-color: var(--primary);
+        color: #ffffff;
+      }
+
+      /* Mini date/time widget in sidebar */
+      .time-widget {
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        padding: 0.9rem;
+        border-radius: var(--radius-md);
+        display: none;
+      }
+
+      @media (min-width: 1024px) {
+        .time-widget {
+          display: block;
+        }
+      }
+
+      .time-widget-clock {
+        font-family: var(--font-mono);
+        font-size: 1.45rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        letter-spacing: -0.02em;
+      }
+
+      .time-widget-date {
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+        margin-top: 0.2rem;
+      }
+
+      /* Sidebar bottom tools */
+      .sidebar-bottom {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+      }
+
+      .control-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+      }
+
+      .icon-toggle-btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        padding: 0.6rem 0.85rem;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        flex: 1;
+      }
+
+      .icon-toggle-btn:hover {
+        background-color: var(--bg-surface-subtle);
+        border-color: var(--text-muted);
+      }
+
+      .notification-pill {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.6rem 0.75rem;
+        border-radius: var(--radius-sm);
+        background-color: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        font-size: 0.78rem;
+        color: var(--text-secondary);
+      }
+
+      .notification-pill.granted {
+        border-color: var(--accent-emerald);
+        background: var(--accent-emerald-light);
+        color: #065f46;
+      }
+
+      [data-theme="dark"] .notification-pill.granted {
+        color: #6ee7b7;
+      }
+
+      /* Main Content Area */
+      .main-container {
+        flex: 1;
+        padding: 1.25rem;
+        max-width: 1280px;
+        margin: 0 auto;
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .main-container {
+          padding: 2rem;
+          gap: 2rem;
+        }
+      }
+
+      /* Top Header & Search/Action bar */
+      .top-header {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+      }
+
+      @media (min-width: 768px) {
+        .top-header {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .header-greeting h2 {
+        font-size: 1.6rem;
+        font-weight: 800;
+        letter-spacing: -0.025em;
+        line-height: 1.2;
+      }
+
+      .header-greeting p {
+        color: var(--text-secondary);
+        font-size: 0.88rem;
+        margin-top: 0.25rem;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, var(--primary), var(--primary-hover));
+        color: #ffffff;
+        border: none;
+        padding: 0.7rem 1.25rem;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.88rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        box-shadow: 0 4px 14px rgba(79, 70, 229, 0.25);
+        transition: all 0.2s ease;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 18px rgba(79, 70, 229, 0.35);
+      }
+
+      .btn-secondary {
+        background-color: var(--bg-surface);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        padding: 0.68rem 1rem;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        transition: all 0.2s ease;
+      }
+
+      .btn-secondary:hover {
+        background-color: var(--bg-surface-subtle);
+        border-color: var(--text-muted);
+      }
+
+      /* Hero Visual Showcase Card */
+      .hero-card {
+        position: relative;
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        display: flex;
+        flex-direction: column;
+      }
+
+      @media (min-width: 880px) {
+        .hero-card {
+          flex-direction: row;
+          min-height: 180px;
+        }
+      }
+
+      .hero-image-wrapper {
+        position: relative;
+        width: 100%;
+        height: 160px;
+        overflow: hidden;
+      }
+
+      @media (min-width: 880px) {
+        .hero-image-wrapper {
+          width: 38%;
+          height: auto;
+        }
+      }
+
+      .hero-image-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s ease;
+      }
+
+      .hero-card:hover .hero-image-wrapper img {
+        transform: scale(1.03);
+      }
+
+      .hero-content {
+        padding: 1.35rem 1.75rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        gap: 0.75rem;
+        background: linear-gradient(to right, var(--bg-surface), var(--bg-surface));
+      }
+
+      .hero-quote {
+        font-size: 0.88rem;
+        font-style: italic;
+        color: var(--text-secondary);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+
+      .hero-stats-row {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 0.75rem;
+      }
+
+      @media (min-width: 640px) {
+        .hero-stats-row {
+          grid-template-columns: repeat(4, 1fr);
+        }
+      }
+
+      .hero-stat-pill {
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        padding: 0.6rem 0.85rem;
+        border-radius: var(--radius-md);
+        display: flex;
+        flex-direction: column;
+      }
+
+      .hero-stat-val {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1.2;
+      }
+
+      .hero-stat-lbl {
+        font-size: 0.72rem;
+        color: var(--text-secondary);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+        margin-top: 0.15rem;
+      }
+
+      /* Progress Bar */
+      .progress-container {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+        margin-top: 0.35rem;
+      }
+
+      .progress-label-row {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+      }
+
+      .progress-track {
+        height: 7px;
+        background-color: var(--bg-surface-subtle);
+        border-radius: var(--radius-full);
+        overflow: hidden;
+      }
+
+      .progress-fill {
+        height: 100%;
+        background: linear-gradient(90deg, #4f46e5, #10b981);
+        border-radius: var(--radius-full);
+        transition: width 0.4s ease;
+      }
+
+      /* TAB VIEWS */
+      .view-section {
+        display: none;
+        animation: fadeIn 0.25s ease forwards;
+      }
+
+      .view-section.active {
+        display: block;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(6px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      /* Quick Add Task Card */
+      .quick-add-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        box-shadow: var(--shadow-sm);
+        margin-bottom: 1.5rem;
+        transition: box-shadow 0.2s ease;
+      }
+
+      .quick-add-card:focus-within {
+        box-shadow: var(--shadow-md);
+        border-color: var(--primary-border);
+      }
+
+      .quick-add-form {
+        display: flex;
+        flex-direction: column;
+        gap: 0.9rem;
+      }
+
+      .quick-add-main-row {
+        display: flex;
+        gap: 0.75rem;
+      }
+
+      .input-text {
+        width: 100%;
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        border-radius: var(--radius-md);
+        font-family: inherit;
+        font-size: 0.95rem;
+        outline: none;
+        transition: all 0.2s ease;
+      }
+
+      .input-text:focus {
+        background: var(--bg-surface);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 3px var(--primary-light);
+      }
+
+      .quick-add-details-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .field-group {
+        display: inline-flex;
+        align-items: center;
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-sm);
+        padding: 0.35rem 0.65rem;
+        gap: 0.45rem;
+        font-size: 0.82rem;
+        color: var(--text-secondary);
+      }
+
+      .field-group i {
+        color: var(--text-muted);
+        font-size: 0.85rem;
+      }
+
+      .field-group select,
+      .field-group input {
+        background: transparent;
+        border: none;
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.82rem;
+        outline: none;
+        cursor: pointer;
+      }
+
+      /* Filter & Controls Toolbar */
+      .toolbar-card {
+        background-color: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 0.85rem 1.15rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+      }
+
+      @media (min-width: 860px) {
+        .toolbar-card {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .toolbar-left, .toolbar-right {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        flex-wrap: wrap;
+      }
+
+      .filter-pill {
+        padding: 0.38rem 0.8rem;
+        border-radius: var(--radius-full);
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        color: var(--text-secondary);
+        font-family: inherit;
+        font-size: 0.78rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+      }
+
+      .filter-pill:hover {
+        background: var(--border-color);
+        color: var(--text-primary);
+      }
+
+      .filter-pill.active {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: #ffffff;
+      }
+
+      .search-box {
+        position: relative;
+        display: flex;
+        align-items: center;
+      }
+
+      .search-box i {
+        position: absolute;
+        left: 0.75rem;
+        color: var(--text-muted);
+        font-size: 0.82rem;
+      }
+
+      .search-box input {
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        padding: 0.4rem 0.75rem 0.4rem 2rem;
+        border-radius: var(--radius-full);
+        font-size: 0.82rem;
+        font-family: inherit;
+        outline: none;
+        width: 170px;
+        transition: all 0.2s ease;
+      }
+
+      .search-box input:focus {
+        width: 220px;
+        border-color: var(--primary);
+        background: var(--bg-surface);
+      }
+
+      /* Task Cards Grid / List */
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+      }
+
+      .task-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        display: flex;
+        align-items: flex-start;
+        gap: 1rem;
+        transition: all 0.2s ease;
+        position: relative;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .task-card:hover {
+        border-color: var(--primary-border);
+        box-shadow: var(--shadow-md);
+        transform: translateY(-1px);
+      }
+
+      .task-card.completed {
+        background-color: var(--bg-surface-subtle);
+        opacity: 0.78;
+      }
+
+      .task-card.priority-high {
+        border-left: 4px solid var(--accent-rose);
+      }
+
+      .task-card.priority-medium {
+        border-left: 4px solid var(--accent-amber);
+      }
+
+      .task-card.priority-low {
+        border-left: 4px solid var(--accent-emerald);
+      }
+
+      /* Custom Checkbox */
+      .task-checkbox-btn {
+        background: transparent;
+        border: none;
+        cursor: pointer;
+        padding: 0.2rem;
+        margin-top: 0.15rem;
+        color: var(--text-muted);
+        font-size: 1.25rem;
+        transition: transform 0.2s ease, color 0.2s ease;
+        line-height: 1;
+      }
+
+      .task-checkbox-btn:hover {
+        transform: scale(1.15);
+        color: var(--primary);
+      }
+
+      .task-card.completed .task-checkbox-btn {
+        color: var(--accent-emerald);
+      }
+
+      .task-body {
+        flex: 1;
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .task-header-line {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        flex-wrap: wrap;
+      }
+
+      /* Inline Editable Title */
+      .task-title {
+        font-size: 0.98rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        letter-spacing: -0.015em;
+        cursor: text;
+        padding: 0.1rem 0.3rem;
+        border-radius: var(--radius-sm);
+        transition: background 0.2s ease;
+      }
+
+      .task-title:hover {
+        background-color: var(--bg-surface-subtle);
+      }
+
+      .task-card.completed .task-title {
+        text-decoration: line-through;
+        color: var(--text-muted);
+      }
+
+      /* Inline Editable Description */
+      .task-desc {
+        font-size: 0.84rem;
+        color: var(--text-secondary);
+        line-height: 1.4;
+        cursor: text;
+        padding: 0.1rem 0.3rem;
+        border-radius: var(--radius-sm);
+      }
+
+      .task-desc:hover {
+        background-color: var(--bg-surface-subtle);
+      }
+
+      .task-desc:empty::before {
+        content: 'Add description...';
+        color: var(--text-muted);
+        font-style: italic;
+      }
+
+      /* Badges */
+      .badge {
+        font-size: 0.7rem;
+        font-weight: 700;
+        padding: 0.15rem 0.55rem;
+        border-radius: var(--radius-full);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .badge-high {
+        background: var(--accent-rose-light);
+        color: #be123c;
+      }
+      [data-theme="dark"] .badge-high { color: #fb7185; }
+
+      .badge-medium {
+        background: var(--accent-amber-light);
+        color: #b45309;
+      }
+      [data-theme="dark"] .badge-medium { color: #fbbf24; }
+
+      .badge-low {
+        background: var(--accent-emerald-light);
+        color: #047857;
+      }
+      [data-theme="dark"] .badge-low { color: #34d399; }
+
+      .badge-cat {
+        background: var(--bg-surface-subtle);
+        color: var(--text-secondary);
+        border: 1px solid var(--border-color);
+      }
+
+      .badge-time {
+        background: var(--primary-light);
+        color: var(--primary);
+        font-family: var(--font-mono);
+        font-weight: 600;
+      }
+
+      .badge-date {
+        background: var(--bg-surface-subtle);
+        color: var(--text-secondary);
+      }
+
+      /* Task Action Buttons */
+      .task-actions {
+        display: flex;
+        align-items: center;
+        gap: 0.25rem;
+        opacity: 0.85;
+      }
+
+      .action-icon-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        padding: 0.4rem;
+        border-radius: var(--radius-sm);
+        cursor: pointer;
+        font-size: 0.85rem;
+        transition: all 0.15s ease;
+      }
+
+      .action-icon-btn:hover {
+        background-color: var(--bg-surface-subtle);
+        color: var(--text-primary);
+      }
+
+      .action-icon-btn.btn-delete:hover {
+        color: var(--accent-rose);
+        background-color: var(--accent-rose-light);
+      }
+
+      /* Empty State */
+      .empty-state {
+        text-align: center;
+        padding: 3rem 1.5rem;
+        background: var(--bg-surface);
+        border-radius: var(--radius-lg);
+        border: 1px dashed var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .empty-state img {
+        width: 170px;
+        height: 125px;
+        object-fit: cover;
+        border-radius: var(--radius-md);
+        box-shadow: var(--shadow-sm);
+      }
+
+      .empty-state h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .empty-state p {
+        font-size: 0.86rem;
+        color: var(--text-secondary);
+        max-width: 360px;
+      }
+
+      /* ========================================================
+         TIME BLOCK PLANNER SECTION
+         ======================================================== */
+      .planner-header-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.25rem 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .planner-header-card {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .planner-date-nav {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+      }
+
+      .date-nav-btn {
+        width: 36px;
+        height: 36px;
+        border-radius: var(--radius-sm);
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+      }
+
+      .date-nav-btn:hover {
+        background: var(--bg-surface-subtle);
+      }
+
+      .current-date-title {
+        font-size: 1.15rem;
+        font-weight: 800;
+        letter-spacing: -0.02em;
+      }
+
+      .planner-quick-date {
+        background: var(--bg-surface-subtle);
+        border: 1px solid var(--border-color);
+        color: var(--text-primary);
+        font-family: inherit;
+        font-size: 0.85rem;
+        font-weight: 600;
+        padding: 0.4rem 0.85rem;
+        border-radius: var(--radius-md);
+        outline: none;
+        cursor: pointer;
+      }
+
+      /* Planner Grid Timeline */
+      .planner-timeline-wrapper {
+        position: relative;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+      }
+
+      .planner-banner-strip {
+        height: 120px;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .planner-banner-strip img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+
+      .planner-banner-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, rgba(15, 23, 42, 0.2), rgba(15, 23, 42, 0.7));
+        display: flex;
+        align-items: flex-end;
+        padding: 1rem 1.5rem;
+        color: #ffffff;
+      }
+
+      .planner-banner-overlay h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .planner-banner-overlay p {
+        font-size: 0.8rem;
+        opacity: 0.9;
+      }
+
+      /* Hourly Slots */
+      .hourly-slots-list {
+        display: flex;
+        flex-direction: column;
+        position: relative;
+      }
+
+      .hour-block {
+        display: flex;
+        min-height: 82px;
+        border-bottom: 1px solid var(--border-color);
+        position: relative;
+        transition: background-color 0.15s ease;
+      }
+
+      .hour-block:hover {
+        background-color: rgba(79, 70, 229, 0.02);
+      }
+
+      .hour-label-col {
+        width: 90px;
+        padding: 0.75rem 0.85rem;
+        border-right: 1px solid var(--border-color);
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        background: var(--bg-surface-subtle);
+        flex-shrink: 0;
+      }
+
+      .hour-label-time {
+        font-family: var(--font-mono);
+        font-size: 0.85rem;
+        font-weight: 700;
+        color: var(--text-primary);
+      }
+
+      .hour-label-period {
+        font-size: 0.68rem;
+        color: var(--text-muted);
+        text-transform: uppercase;
+        font-weight: 600;
+      }
+
+      .hour-tasks-col {
+        flex: 1;
+        padding: 0.5rem 0.85rem;
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.65rem;
+        position: relative;
+      }
+
+      .hour-add-btn {
+        opacity: 0;
+        background: transparent;
+        border: 1px dashed var(--border-color);
+        color: var(--text-muted);
+        border-radius: var(--radius-sm);
+        padding: 0.35rem 0.65rem;
+        font-size: 0.78rem;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        transition: all 0.15s ease;
+      }
+
+      .hour-block:hover .hour-add-btn {
+        opacity: 1;
+      }
+
+      .hour-add-btn:hover {
+        border-color: var(--primary);
+        color: var(--primary);
+        background: var(--primary-light);
+      }
+
+      /* Slotted Task Chip */
+      .slotted-task-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.45rem 0.75rem;
+        border-radius: var(--radius-md);
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        box-shadow: var(--shadow-sm);
+        font-size: 0.83rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        max-width: 100%;
+      }
+
+      .slotted-task-chip:hover {
+        border-color: var(--primary);
+        transform: translateY(-1px);
+        box-shadow: var(--shadow-md);
+      }
+
+      .slotted-task-chip.completed {
+        text-decoration: line-through;
+        opacity: 0.6;
+        background: var(--bg-surface-subtle);
+      }
+
+      .slotted-time-tag {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        background: var(--primary-light);
+        color: var(--primary);
+        padding: 0.1rem 0.35rem;
+        border-radius: var(--radius-sm);
+      }
+
+      /* Current Time Indicator Line */
+      .current-time-indicator {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background-color: var(--accent-rose);
+        z-index: 20;
+        pointer-events: none;
+        display: flex;
+        align-items: center;
+      }
+
+      .current-time-dot {
+        position: absolute;
+        left: 84px;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: var(--accent-rose);
+        box-shadow: 0 0 0 4px rgba(244, 63, 94, 0.25);
+      }
+
+      /* ========================================================
+         UPCOMING REMINDERS SECTION
+         ======================================================== */
+      .reminders-hero-banner {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        margin-bottom: 1.5rem;
+      }
+
+      @media (min-width: 768px) {
+        .reminders-hero-banner {
+          flex-direction: row;
+          align-items: center;
+          justify-content: space-between;
+        }
+      }
+
+      .reminder-status-info {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .reminder-bell-icon {
+        width: 52px;
+        height: 52px;
+        border-radius: var(--radius-md);
+        background: var(--accent-amber-light);
+        color: var(--accent-amber);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+      }
+
+      .reminder-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1.15rem 1.4rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        box-shadow: var(--shadow-sm);
+        transition: all 0.2s ease;
+      }
+
+      .reminder-card:hover {
+        border-color: var(--primary-border);
+        box-shadow: var(--shadow-md);
+      }
+
+      .reminder-left {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+      }
+
+      .reminder-countdown-badge {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        font-weight: 700;
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--radius-full);
+        background: var(--primary-light);
+        color: var(--primary);
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+      }
+
+      .reminder-countdown-badge.overdue {
+        background: var(--accent-rose-light);
+        color: var(--accent-rose);
+      }
+
+      /* Modal Dialog Styles */
+      .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        background: rgba(15, 23, 42, 0.6);
+        backdrop-filter: blur(4px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        z-index: 100;
+        padding: 1rem;
+      }
+
+      .modal-backdrop.open {
+        display: flex;
+      }
+
+      .modal-card {
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-lg);
+        width: 100%;
+        max-width: 540px;
+        box-shadow: var(--shadow-xl);
+        overflow: hidden;
+        animation: modalScale 0.2s ease-out forwards;
+      }
+
+      @keyframes modalScale {
+        from {
+          opacity: 0;
+          transform: scale(0.95);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
+
+      .modal-header {
+        padding: 1.25rem 1.5rem;
+        border-bottom: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      .modal-header h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+
+      .modal-close-btn {
+        background: transparent;
+        border: none;
+        color: var(--text-muted);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0.35rem;
+        border-radius: var(--radius-sm);
+        transition: color 0.15s ease;
+      }
+
+      .modal-close-btn:hover {
+        color: var(--text-primary);
+      }
+
+      .modal-body {
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.1rem;
+        max-height: 75vh;
+        overflow-y: auto;
+      }
+
+      .form-row {
+        display: flex;
+        flex-direction: column;
+        gap: 0.35rem;
+      }
+
+      .form-row label {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      .form-grid-2 {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.85rem;
+      }
+
+      .modal-footer {
+        padding: 1rem 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 0.75rem;
+        background: var(--bg-surface-subtle);
+      }
+
+      /* Priority Selection Buttons */
+      .priority-selector {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 0.5rem;
+      }
+
+      .priority-option-btn {
+        padding: 0.55rem;
+        border: 1px solid var(--border-color);
+        background: var(--bg-surface);
+        color: var(--text-primary);
+        border-radius: var(--radius-sm);
+        font-family: inherit;
+        font-size: 0.82rem;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.4rem;
+        transition: all 0.2s ease;
+      }
+
+      .priority-option-btn[data-priority="high"].selected {
+        background: var(--accent-rose-light);
+        border-color: var(--accent-rose);
+        color: var(--accent-rose);
+      }
+
+      .priority-option-btn[data-priority="medium"].selected {
+        background: var(--accent-amber-light);
+        border-color: var(--accent-amber);
+        color: var(--accent-amber);
+      }
+
+      .priority-option-btn[data-priority="low"].selected {
+        background: var(--accent-emerald-light);
+        border-color: var(--accent-emerald);
+        color: var(--accent-emerald);
+      }
+
+      /* In-App Toast & Audio Alert Notification Banner */
+      .toast-container {
+        position: fixed;
+        bottom: 1.5rem;
+        right: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+        z-index: 200;
+        max-width: 420px;
+        width: calc(100% - 3rem);
+        pointer-events: none;
+      }
+
+      .toast-item {
+        pointer-events: auto;
+        background: var(--bg-surface);
+        border: 1px solid var(--border-color);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.25rem;
+        box-shadow: var(--shadow-xl);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        animation: toastSlide 0.3s ease-out forwards;
+      }
+
+      @keyframes toastSlide {
+        from {
+          opacity: 0;
+          transform: translateY(20px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      .toast-alert {
+        border-left: 4px solid var(--primary);
+      }
+
+      .toast-btn {
+        background: var(--primary-light);
+        color: var(--primary);
+        border: none;
+        padding: 0.35rem 0.75rem;
+        border-radius: var(--radius-sm);
+        font-weight: 700;
+        font-size: 0.8rem;
+        cursor: pointer;
+      }
+
+      /* Sound indicator pulse */
+      .sound-pulse {
+        animation: soundRhythm 1s infinite alternate ease-in-out;
+      }
+
+      @keyframes soundRhythm {
+        from { transform: scale(1); }
+        to { transform: scale(1.15); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app-layout">
+      <!-- SIDEBAR NAVIGATION -->
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <!-- Logo & Brand -->
+          <div class="logo-area">
+            <div class="logo-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <div class="logo-text">
+              <h1>Chronoflow</h1>
+              <p>To-Do &amp; Daily Planner</p>
+            </div>
+          </div>
+
+          <!-- Navigation Links -->
+          <nav class="nav-menu" aria-label="Main Navigation">
+            <button class="nav-btn active" data-view="tasks" id="navTasksBtn">
+              <i class="fa-solid fa-list-check"></i>
+              <span>Today's Tasks</span>
+              <span class="badge-count" id="navTasksBadge">0</span>
+            </button>
+            <button class="nav-btn" data-view="planner" id="navPlannerBtn">
+              <i class="fa-solid fa-timeline"></i>
+              <span>Daily Time Planner</span>
+              <span class="badge-count" id="navPlannerBadge">0</span>
+            </button>
+            <button class="nav-btn" data-view="reminders" id="navRemindersBtn">
+              <i class="fa-solid fa-bell"></i>
+              <span>Upcoming Reminders</span>
+              <span class="badge-count" id="navRemindersBadge">0</span>
+            </button>
+          </nav>
+
+          <!-- Sidebar Live Time Widget -->
+          <div class="time-widget">
+            <div class="time-widget-clock" id="liveClockDisplay">00:00:00</div>
+            <div class="time-widget-date" id="liveDateDisplay">Monday, Oct 12, 2026</div>
+          </div>
+        </div>
+
+        <!-- Sidebar Bottom Controls -->
+        <div class="sidebar-bottom">
+          <div class="notification-pill" id="notificationStatusPill">
+            <span><i class="fa-solid fa-bell mr-1"></i> Notifications</span>
+            <button class="icon-toggle-btn" id="btnReqNotification" style="padding: 0.2rem 0.5rem; font-size: 0.72rem; flex: none;">
+              Enable
+            </button>
+          </div>
+
+          <div class="control-row">
+            <button class="icon-toggle-btn" id="btnToggleSound" title="Toggle Sound Chimes">
+              <i class="fa-solid fa-volume-high" id="soundIcon"></i>
+              <span id="soundLabel">Sound On</span>
+            </button>
+            <button class="icon-toggle-btn" id="btnToggleTheme" title="Toggle Dark/Light Mode">
+              <i class="fa-solid fa-moon" id="themeIcon"></i>
+              <span id="themeLabel">Dark Mode</span>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <!-- MAIN CONTENT -->
+      <main class="main-container">
+        <!-- Top Header & Action Controls -->
+        <header class="top-header">
+          <div class="header-greeting">
+            <h2 id="greetingTitle">Good morning, Plan your day</h2>
+            <p id="greetingSubtitle">Focus on what matters most today.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn-secondary" id="btnQuickTestSound" title="Preview Alert Chime">
+              <i class="fa-solid fa-music"></i>
+              <span>Test Chime</span>
+            </button>
+            <button class="btn-primary" id="btnOpenNewTaskModal">
+              <i class="fa-solid fa-plus"></i>
+              <span>New Task</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Visual Hero Showcase Card with Imagery -->
+        <section class="hero-card">
+          <div class="hero-image-wrapper">
+            <img 
+              src="/src/assets/images/planner_hero_1791868746559.jpg" 
+              alt="Daily Planner Workspace" 
+              referrerpolicy="no-referrer"
+            />
+          </div>
+          <div class="hero-content">
+            <div class="hero-quote">
+              <i class="fa-solid fa-quote-left text-primary"></i>
+              <span id="dailyInspiration">"Either you run the day or the day runs you."</span>
+            </div>
+            <div class="hero-stats-row">
+              <div class="hero-stat-pill">
+                <span class="hero-stat-val" id="statTotalTasks">0</span>
+                <span class="hero-stat-lbl">Total Tasks</span>
+              </div>
+              <div class="hero-stat-pill">
+                <span class="hero-stat-val" id="statCompletedTasks">0</span>
+                <span class="hero-stat-lbl">Completed</span>
+              </div>
+              <div class="hero-stat-pill">
+                <span class="hero-stat-val" id="statScheduledToday">0</span>
+                <span class="hero-stat-lbl">Time-Blocked</span>
+              </div>
+              <div class="hero-stat-pill">
+                <span class="hero-stat-val" id="statHighPriority">0</span>
+                <span class="hero-stat-lbl">High Priority</span>
+              </div>
+            </div>
+            <div class="progress-container">
+              <div class="progress-label-row">
+                <span>Daily Completion</span>
+                <span id="progressPercentageText">0%</span>
+              </div>
+              <div class="progress-track">
+                <div class="progress-fill" id="progressBarFill" style="width: 0%;"></div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================
+             VIEW 1: TODAY'S TASKS
+             ======================================================== -->
+        <section class="view-section active" id="viewTasks">
+          <!-- Quick Add Form -->
+          <div class="quick-add-card">
+            <form id="quickAddForm" class="quick-add-form" onsubmit="event.preventDefault();">
+              <div class="quick-add-main-row">
+                <input 
+                  type="text" 
+                  id="quickTaskTitle" 
+                  class="input-text" 
+                  placeholder="What needs to be done today? (Press Enter to add)" 
+                  required 
+                  autocomplete="off"
+                />
+                <button type="submit" class="btn-primary" style="flex-shrink: 0;">
+                  <i class="fa-solid fa-plus"></i>
+                  <span>Add</span>
+                </button>
+              </div>
+              <div class="quick-add-details-row">
+                <div class="field-group" title="Priority">
+                  <i class="fa-solid fa-flag"></i>
+                  <select id="quickTaskPriority">
+                    <option value="medium">Medium Priority</option>
+                    <option value="high">High Priority</option>
+                    <option value="low">Low Priority</option>
+                  </select>
+                </div>
+                <div class="field-group" title="Category">
+                  <i class="fa-solid fa-tag"></i>
+                  <select id="quickTaskCategory">
+                    <option value="Work">Work</option>
+                    <option value="Personal">Personal</option>
+                    <option value="Health">Health</option>
+                    <option value="Learning">Learning</option>
+                    <option value="Errands">Errands</option>
+                  </select>
+                </div>
+                <div class="field-group" title="Due Date">
+                  <i class="fa-solid fa-calendar-day"></i>
+                  <input type="date" id="quickTaskDate" />
+                </div>
+                <div class="field-group" title="Time Reminder / Block">
+                  <i class="fa-solid fa-clock"></i>
+                  <input type="time" id="quickTaskTime" placeholder="Reminder Time" />
+                </div>
+              </div>
+            </form>
+          </div>
+
+          <!-- Filters & Sorting Toolbar -->
+          <div class="toolbar-card">
+            <div class="toolbar-left">
+              <button class="filter-pill active" data-filter="status" data-value="all">All Tasks</button>
+              <button class="filter-pill" data-filter="status" data-value="active">Active</button>
+              <button class="filter-pill" data-filter="status" data-value="completed">Completed</button>
+              <span style="color: var(--border-color);">|</span>
+              <button class="filter-pill" data-filter="priority" data-value="high">High Priority</button>
+              <button class="filter-pill" data-filter="priority" data-value="medium">Medium</button>
+              <button class="filter-pill" data-filter="priority" data-value="low">Low</button>
+            </div>
+            <div class="toolbar-right">
+              <div class="search-box">
+                <i class="fa-solid fa-magnifying-glass"></i>
+                <input type="text" id="taskSearchInput" placeholder="Search tasks..." />
+              </div>
+              <div class="field-group" style="padding: 0.3rem 0.5rem;">
+                <i class="fa-solid fa-arrow-down-short-wide"></i>
+                <select id="taskSortSelect">
+                  <option value="time-asc">Sort: Time / Due</option>
+                  <option value="priority-desc">Sort: Priority</option>
+                  <option value="created-desc">Sort: Newest</option>
+                  <option value="title-asc">Sort: Title (A-Z)</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <!-- Task Cards Container -->
+          <div class="task-list" id="taskListContainer">
+            <!-- Dynamically populated via Vanilla JS -->
+          </div>
+        </section>
+
+        <!-- ========================================================
+             VIEW 2: DAILY TIME-BLOCK PLANNER (6:00 AM - 11:00 PM)
+             ======================================================== -->
+        <section class="view-section" id="viewPlanner">
+          <div class="planner-header-card">
+            <div class="planner-date-nav">
+              <button class="date-nav-btn" id="btnPlannerPrevDay" title="Previous Day">
+                <i class="fa-solid fa-chevron-left"></i>
+              </button>
+              <div class="current-date-title" id="plannerCurrentDateTitle">Today's Schedule</div>
+              <button class="date-nav-btn" id="btnPlannerNextDay" title="Next Day">
+                <i class="fa-solid fa-chevron-right"></i>
+              </button>
+              <button class="btn-secondary" id="btnPlannerToday" style="padding: 0.45rem 0.75rem; font-size: 0.8rem;">
+                Today
+              </button>
+            </div>
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span style="font-size: 0.82rem; color: var(--text-secondary); font-weight: 600;">Jump to date:</span>
+              <input type="date" id="plannerDatePicker" class="planner-quick-date" />
+            </div>
+          </div>
+
+          <div class="planner-timeline-wrapper">
+            <div class="planner-banner-strip">
+              <img 
+                src="/src/assets/images/time_planner_banner_1791868747874.jpg" 
+                alt="Time Planner Visual" 
+                referrerpolicy="no-referrer"
+              />
+              <div class="planner-banner-overlay">
+                <div>
+                  <h3>Hourly Schedule (6:00 AM – 11:00 PM)</h3>
+                  <p>Tasks with specific reminder times automatically sync to their respective hourly block.</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- Visual Hours 06:00 to 23:00 -->
+            <div class="hourly-slots-list" id="hourlySlotsContainer">
+              <!-- Dynamically rendered -->
+            </div>
+          </div>
+        </section>
+
+        <!-- ========================================================
+             VIEW 3: UPCOMING REMINDERS & NOTIFICATION CENTER
+             ======================================================== -->
+        <section class="view-section" id="viewReminders">
+          <div class="reminders-hero-banner">
+            <div class="reminder-status-info">
+              <div class="reminder-bell-icon">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700;">Real-Time Reminder Engine</h3>
+                <p style="font-size: 0.85rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                  Background watcher checks tasks against current local time every 5s and triggers native browser alerts &amp; audio chimes.
+                </p>
+              </div>
+            </div>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button class="btn-secondary" id="btnSendTestNotification">
+                <i class="fa-regular fa-bell"></i>
+                <span>Test Notification</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="task-list" id="remindersListContainer">
+            <!-- Dynamically populated -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <!-- ========================================================
+         MODAL: CREATE / EDIT TASK
+         ======================================================== -->
+    <div class="modal-backdrop" id="taskModalBackdrop">
+      <div class="modal-card">
+        <div class="modal-header">
+          <h3 id="modalTitle">Edit Task</h3>
+          <button class="modal-close-btn" id="btnCloseModal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <form id="taskModalForm" onsubmit="event.preventDefault();">
+          <input type="hidden" id="modalTaskId" />
+          <div class="modal-body">
+            <div class="form-row">
+              <label for="modalTaskTitle">Task Title *</label>
+              <input type="text" id="modalTaskTitle" class="input-text" placeholder="e.g. Prepare presentation slides" required />
+            </div>
+
+            <div class="form-row">
+              <label for="modalTaskDesc">Description / Notes</label>
+              <textarea id="modalTaskDesc" class="input-text" rows="3" placeholder="Add additional details or sub-points..."></textarea>
+            </div>
+
+            <div class="form-row">
+              <label>Priority</label>
+              <div class="priority-selector">
+                <button type="button" class="priority-option-btn" data-priority="high">
+                  <i class="fa-solid fa-circle" style="color: var(--accent-rose); font-size: 0.6rem;"></i> High
+                </button>
+                <button type="button" class="priority-option-btn selected" data-priority="medium">
+                  <i class="fa-solid fa-circle" style="color: var(--accent-amber); font-size: 0.6rem;"></i> Medium
+                </button>
+                <button type="button" class="priority-option-btn" data-priority="low">
+                  <i class="fa-solid fa-circle" style="color: var(--accent-emerald); font-size: 0.6rem;"></i> Low
+                </button>
+              </div>
+              <input type="hidden" id="modalTaskPriority" value="medium" />
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-row">
+                <label for="modalTaskCategory">Category</label>
+                <select id="modalTaskCategory" class="input-text">
+                  <option value="Work">Work</option>
+                  <option value="Personal">Personal</option>
+                  <option value="Health">Health</option>
+                  <option value="Learning">Learning</option>
+                  <option value="Errands">Errands</option>
+                  <option value="Home">Home</option>
+                </select>
+              </div>
+              <div class="form-row">
+                <label for="modalTaskDate">Due Date</label>
+                <input type="date" id="modalTaskDate" class="input-text" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <label for="modalTaskTime">Specific Reminder Time</label>
+              <input type="time" id="modalTaskTime" class="input-text" />
+              <p style="font-size: 0.72rem; color: var(--text-muted); margin-top: 0.25rem;">
+                Setting a time automatically places this item into the Daily Time Planner schedule.
+              </p>
+            </div>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn-secondary" id="btnCancelModal">Cancel</button>
+            <button type="submit" class="btn-primary" id="btnSaveModal">Save Task</button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL: DELETE CONFIRMATION
+         ======================================================== -->
+    <div class="modal-backdrop" id="deleteModalBackdrop">
+      <div class="modal-card" style="max-width: 420px;">
+        <div class="modal-header">
+          <h3>Delete Task</h3>
+          <button class="modal-close-btn" id="btnCloseDeleteModal">
+            <i class="fa-solid fa-xmark"></i>
+          </button>
+        </div>
+        <div class="modal-body" style="padding: 1.25rem 1.5rem;">
+          <p style="font-size: 0.92rem; color: var(--text-primary);">
+            Are you sure you want to delete <strong id="deleteTaskTitle">this task</strong>?
+          </p>
+          <p style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 0.25rem;">
+            You can also restore it immediately using the undo notification toast.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-secondary" id="btnCancelDelete">Cancel</button>
+          <button type="button" class="btn-primary" id="btnConfirmDelete" style="background: var(--accent-rose);">
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOAST NOTIFICATION CONTAINER -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- ========================================================
+         VANILLA JAVASCRIPT APPLICATION CODE
+         ======================================================== -->
+    <script>
+      (function () {
+        'use strict';
+
+        // --- CONSTANTS & DEFAULT SAMPLE DATA ---
+        const STORAGE_KEY_TASKS = 'chronoflow_tasks_v1';
+        const STORAGE_KEY_SETTINGS = 'chronoflow_settings_v1';
+
+        const todayStr = getTodayISOString();
+
+        const DEFAULT_SAMPLE_TASKS = [
+          {
+            id: 'task-1',
+            title: 'Morning stretch & mindfulness hydration',
+            description: 'Drink 500ml water and 15 mins gentle stretching',
+            priority: 'low',
+            category: 'Health',
+            dueDate: todayStr,
+            reminderTime: '07:30',
+            completed: true,
+            notified: false,
+            createdAt: Date.now() - 36000000
+          },
+          {
+            id: 'task-2',
+            title: 'Review daily planner & prioritize key goals',
+            description: 'Organize high-impact items for the day before team sync',
+            priority: 'high',
+            category: 'Work',
+            dueDate: todayStr,
+            reminderTime: '09:00',
+            completed: false,
+            notified: false,
+            createdAt: Date.now() - 25000000
+          },
+          {
+            id: 'task-3',
+            title: 'Team sync & project status alignment',
+            description: 'Discuss sprint deliverables and remove current blockers',
+            priority: 'high',
+            category: 'Work',
+            dueDate: todayStr,
+            reminderTime: '11:00',
+            completed: false,
+            notified: false,
+            createdAt: Date.now() - 18000000
+          },
+          {
+            id: 'task-4',
+            title: 'Healthy lunch & outdoor walk',
+            description: 'Step away from screen, enjoy 20-minute sunlight break',
+            priority: 'medium',
+            category: 'Health',
+            dueDate: todayStr,
+            reminderTime: '13:00',
+            completed: false,
+            notified: false,
+            createdAt: Date.now() - 10000000
+          },
+          {
+            id: 'task-5',
+            title: 'Deep Focus: Feature implementation & code review',
+            description: 'Work without notifications on main deliverable',
+            priority: 'medium',
+            category: 'Work',
+            dueDate: todayStr,
+            reminderTime: '15:30',
+            completed: false,
+            notified: false,
+            createdAt: Date.now() - 5000000
+          },
+          {
+            id: 'task-6',
+            title: 'Evening reading: 20 pages of nonfiction',
+            description: 'Wind down with tea and book',
+            priority: 'low',
+            category: 'Learning',
+            dueDate: todayStr,
+            reminderTime: '21:00',
+            completed: false,
+            notified: false,
+            createdAt: Date.now() - 2000000
+          }
+        ];
+
+        // --- APP STATE ---
+        let tasks = loadTasksFromStorage();
+        let settings = loadSettingsFromStorage();
+        let currentView = 'tasks'; // 'tasks' | 'planner' | 'reminders'
+        let currentFilterStatus = 'all'; // 'all' | 'active' | 'completed'
+        let currentFilterPriority = 'all'; // 'all' | 'high' | 'medium' | 'low'
+        let currentSearchQuery = '';
+        let currentSortOption = 'time-asc';
+        let plannerSelectedDate = todayStr;
+        let lastDeletedTask = null;
+        let pendingDeleteId = null;
+
+        // --- INITIALIZATION ---
+        document.addEventListener('DOMContentLoaded', () => {
+          initTheme();
+          initAudio();
+          initLiveClock();
+          initNavigation();
+          initEventListeners();
+          initNotificationEngine();
+          updateNotificationUI();
+          renderAll();
+        });
+
+        // --- STORAGE HELPERS ---
+        function getTodayISOString() {
+          const now = new Date();
+          const year = now.getFullYear();
+          const month = String(now.getMonth() + 1).padStart(2, '0');
+          const day = String(now.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+
+        function loadTasksFromStorage() {
+          try {
+            const data = localStorage.getItem(STORAGE_KEY_TASKS);
+            if (data) {
+              return JSON.parse(data);
+            }
+          } catch (e) {
+            console.error('Failed to parse tasks from localStorage', e);
+          }
+          // Seed defaults
+          localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(DEFAULT_SAMPLE_TASKS));
+          return [...DEFAULT_SAMPLE_TASKS];
+        }
+
+        function saveTasksToStorage() {
+          try {
+            localStorage.setItem(STORAGE_KEY_TASKS, JSON.stringify(tasks));
+          } catch (e) {
+            console.error('Failed to save tasks to localStorage', e);
+          }
+        }
+
+        function loadSettingsFromStorage() {
+          const defaults = {
+            theme: 'light',
+            soundEnabled: true
+          };
+          try {
+            const data = localStorage.getItem(STORAGE_KEY_SETTINGS);
+            if (data) return { ...defaults, ...JSON.parse(data) };
+          } catch (e) {}
+          return defaults;
+        }
+
+        function saveSettingsToStorage() {
+          try {
+            localStorage.setItem(STORAGE_KEY_SETTINGS, JSON.stringify(settings));
+          } catch (e) {}
+        }
+
+        // --- THEME MANAGEMENT ---
+        function initTheme() {
+          if (settings.theme === 'dark' || (!settings.theme && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            settings.theme = 'dark';
+            document.documentElement.setAttribute('data-theme', 'dark');
+            updateThemeButtonUI(true);
+          } else {
+            settings.theme = 'light';
+            document.documentElement.removeAttribute('data-theme');
+            updateThemeButtonUI(false);
+          }
+        }
+
+        function toggleTheme() {
+          const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+          if (isDark) {
+            document.documentElement.removeAttribute('data-theme');
+            settings.theme = 'light';
+            updateThemeButtonUI(false);
+          } else {
+            document.documentElement.setAttribute('data-theme', 'dark');
+            settings.theme = 'dark';
+            updateThemeButtonUI(true);
+          }
+          saveSettingsToStorage();
+        }
+
+        function updateThemeButtonUI(isDark) {
+          const themeIcon = document.getElementById('themeIcon');
+          const themeLabel = document.getElementById('themeLabel');
+          if (isDark) {
+            themeIcon.className = 'fa-solid fa-sun';
+            themeLabel.textContent = 'Light Mode';
+          } else {
+            themeIcon.className = 'fa-solid fa-moon';
+            themeLabel.textContent = 'Dark Mode';
+          }
+        }
+
+        // --- AUDIO ENGINE (Pure Web Audio API Synthesizer - Crisp Harmonic Chime) ---
+        let audioCtx = null;
+
+        function initAudio() {
+          updateSoundButtonUI(settings.soundEnabled);
+        }
+
+        function getAudioContext() {
+          if (!audioCtx) {
+            const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+            if (AudioContextClass) {
+              audioCtx = new AudioContextClass();
+            }
+          }
+          if (audioCtx && audioCtx.state === 'suspended') {
+            audioCtx.resume();
+          }
+          return audioCtx;
+        }
+
+        function playHarmonicChime() {
+          if (!settings.soundEnabled) return;
+          try {
+            const ctx = getAudioContext();
+            if (!ctx) return;
+
+            const now = ctx.currentTime;
+            
+            // Note sequence: E5 (659.25), G#5 (830.61), B5 (987.77)
+            const notes = [
+              { freq: 659.25, time: 0.0, dur: 0.45 },
+              { freq: 830.61, time: 0.12, dur: 0.55 },
+              { freq: 987.77, time: 0.24, dur: 0.8 }
+            ];
+
+            notes.forEach(note => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+
+              osc.type = 'sine';
+              osc.frequency.setValueAtTime(note.freq, now + note.time);
+
+              gain.gain.setValueAtTime(0.0001, now + note.time);
+              gain.gain.exponentialRampToValueAtTime(0.3, now + note.time + 0.02);
+              gain.gain.exponentialRampToValueAtTime(0.0001, now + note.time + note.dur);
+
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+
+              osc.start(now + note.time);
+              osc.stop(now + note.time + note.dur + 0.05);
+            });
+          } catch (e) {
+            console.warn('Web Audio chime could not play:', e);
+          }
+        }
+
+        function toggleSound() {
+          settings.soundEnabled = !settings.soundEnabled;
+          saveSettingsToStorage();
+          updateSoundButtonUI(settings.soundEnabled);
+          if (settings.soundEnabled) {
+            playHarmonicChime();
+            showToast('Chime sound enabled', 'info');
+          } else {
+            showToast('Chime sound muted', 'info');
+          }
+        }
+
+        function updateSoundButtonUI(enabled) {
+          const soundIcon = document.getElementById('soundIcon');
+          const soundLabel = document.getElementById('soundLabel');
+          if (enabled) {
+            soundIcon.className = 'fa-solid fa-volume-high';
+            soundLabel.textContent = 'Sound On';
+          } else {
+            soundIcon.className = 'fa-solid fa-volume-xmark';
+            soundLabel.textContent = 'Muted';
+          }
+        }
+
+        // --- CLOCK & GREETING ENGINE ---
+        function initLiveClock() {
+          updateLiveClock();
+          setInterval(updateLiveClock, 1000);
+        }
+
+        function updateLiveClock() {
+          const now = new Date();
+          const clockElem = document.getElementById('liveClockDisplay');
+          const dateElem = document.getElementById('liveDateDisplay');
+          
+          if (clockElem) {
+            clockElem.textContent = now.toLocaleTimeString([], { hour12: false });
+          }
+
+          if (dateElem) {
+            const options = { weekday: 'long', month: 'short', day: 'numeric', year: 'numeric' };
+            dateElem.textContent = now.toLocaleDateString(undefined, options);
+          }
+
+          // Greeting update
+          const hour = now.getHours();
+          const greetingTitle = document.getElementById('greetingTitle');
+          if (greetingTitle) {
+            if (hour < 12) greetingTitle.textContent = 'Good morning, Plan your day';
+            else if (hour < 17) greetingTitle.textContent = 'Good afternoon, Stay on track';
+            else greetingTitle.textContent = 'Good evening, Wrap up your priorities';
+          }
+        }
+
+        // --- NOTIFICATION ENGINE ---
+        function initNotificationEngine() {
+          // Check task reminders every 5 seconds
+          setInterval(checkTaskReminders, 5000);
+        }
+
+        function updateNotificationUI() {
+          const pill = document.getElementById('notificationStatusPill');
+          const btn = document.getElementById('btnReqNotification');
+          if (!('Notification' in window)) {
+            if (btn) btn.textContent = 'Unsupported';
+            return;
+          }
+          if (Notification.permission === 'granted') {
+            pill.classList.add('granted');
+            btn.textContent = 'Active';
+            btn.disabled = true;
+          } else if (Notification.permission === 'denied') {
+            pill.classList.remove('granted');
+            btn.textContent = 'Blocked';
+            btn.disabled = false;
+          } else {
+            pill.classList.remove('granted');
+            btn.textContent = 'Enable';
+            btn.disabled = false;
+          }
+        }
+
+        function requestNotificationPermission() {
+          if (!('Notification' in window)) {
+            showToast('Browser notifications are not supported in this browser.', 'warning');
+            return;
+          }
+          Notification.requestPermission().then(permission => {
+            updateNotificationUI();
+            if (permission === 'granted') {
+              showToast('Notifications enabled! You will receive reminder alerts.', 'success');
+              playHarmonicChime();
+            } else {
+              showToast('Notification permission was ' + permission, 'warning');
+            }
+          });
+        }
+
+        function sendTestNotification() {
+          playHarmonicChime();
+          if ('Notification' in window && Notification.permission === 'granted') {
+            try {
+              new Notification('Chronoflow Reminder Test', {
+                body: 'Your reminders are fully functional with native notifications and audio chimes!',
+                icon: '/src/assets/images/tasks_complete_badge_1791868747237.jpg'
+              });
+            } catch (e) {
+              console.log('Notification constructor fallback', e);
+            }
+          }
+          showToast('Test Reminder Alert: Audio chime & notification triggered!', 'reminder');
+        }
+
+        function checkTaskReminders() {
+          const now = new Date();
+          const currentYMD = getTodayISOString();
+          const currentHH = String(now.getHours()).padStart(2, '0');
+          const currentMM = String(now.getMinutes()).padStart(2, '0');
+          const currentHM = `${currentHH}:${currentMM}`;
+
+          tasks.forEach(task => {
+            if (task.completed || task.notified || !task.reminderTime) return;
+
+            // Check if date is today (or date is empty and implies today)
+            const taskDate = task.dueDate || currentYMD;
+            if (taskDate === currentYMD && task.reminderTime === currentHM) {
+              // Trigger reminder!
+              task.notified = true;
+              saveTasksToStorage();
+              playHarmonicChime();
+
+              // Browser Notification
+              if ('Notification' in window && Notification.permission === 'granted') {
+                try {
+                  new Notification(`Task Reminder: ${task.title}`, {
+                    body: task.description || `Priority: ${task.priority.toUpperCase()} - Scheduled for ${task.reminderTime}`,
+                    icon: '/src/assets/images/tasks_complete_badge_1791868747237.jpg'
+                  });
+                } catch (e) {}
+              }
+
+              // In-app interactive toast
+              showToast(`⏰ REMINDER: "${task.title}" at ${task.reminderTime}`, 'reminder', task.id);
+              renderAll();
+            }
+          });
+        }
+
+        // --- NAVIGATION & VIEWS ---
+        function initNavigation() {
+          const navButtons = document.querySelectorAll('.nav-btn');
+          navButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+              const view = btn.getAttribute('data-view');
+              switchView(view);
+            });
+          });
+        }
+
+        function switchView(viewName) {
+          currentView = viewName;
+
+          // Update Nav buttons
+          document.querySelectorAll('.nav-btn').forEach(btn => {
+            if (btn.getAttribute('data-view') === viewName) {
+              btn.classList.add('active');
+            } else {
+              btn.classList.remove('active');
+            }
+          });
+
+          // Update View sections
+          document.querySelectorAll('.view-section').forEach(sec => {
+            sec.classList.remove('active');
+          });
+
+          if (viewName === 'tasks') {
+            document.getElementById('viewTasks').classList.add('active');
+          } else if (viewName === 'planner') {
+            document.getElementById('viewPlanner').classList.add('active');
+            renderPlanner();
+          } else if (viewName === 'reminders') {
+            document.getElementById('viewReminders').classList.add('active');
+            renderReminders();
+          }
+        }
+
+        // --- EVENT LISTENERS ---
+        function initEventListeners() {
+          // Theme & Sound
+          document.getElementById('btnToggleTheme').addEventListener('click', toggleTheme);
+          document.getElementById('btnToggleSound').addEventListener('click', toggleSound);
+          document.getElementById('btnQuickTestSound').addEventListener('click', () => {
+            playHarmonicChime();
+            showToast('Chime audio preview played', 'info');
+          });
+
+          // Notifications
+          document.getElementById('btnReqNotification').addEventListener('click', requestNotificationPermission);
+          document.getElementById('btnSendTestNotification').addEventListener('click', sendTestNotification);
+
+          // Quick Add Form
+          const quickDateInput = document.getElementById('quickTaskDate');
+          if (quickDateInput) quickDateInput.value = todayStr;
+
+          document.getElementById('quickAddForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            handleQuickAddTask();
+          });
+
+          // Modal Handlers
+          document.getElementById('btnOpenNewTaskModal').addEventListener('click', () => openTaskModal());
+          document.getElementById('btnCloseModal').addEventListener('click', closeTaskModal);
+          document.getElementById('btnCancelModal').addEventListener('click', closeTaskModal);
+          document.getElementById('taskModalForm').addEventListener('submit', handleSaveModalTask);
+
+          // Priority Buttons inside Modal
+          document.querySelectorAll('.priority-option-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+              document.querySelectorAll('.priority-option-btn').forEach(b => b.classList.remove('selected'));
+              btn.classList.add('selected');
+              document.getElementById('modalTaskPriority').value = btn.getAttribute('data-priority');
+            });
+          });
+
+          // Delete Modal Handlers
+          document.getElementById('btnCloseDeleteModal').addEventListener('click', closeDeleteModal);
+          document.getElementById('btnCancelDelete').addEventListener('click', closeDeleteModal);
+          document.getElementById('btnConfirmDelete').addEventListener('click', confirmDeleteTask);
+
+          // Search & Filter
+          document.getElementById('taskSearchInput').addEventListener('input', (e) => {
+            currentSearchQuery = e.target.value.toLowerCase().trim();
+            renderTaskList();
+          });
+
+          document.getElementById('taskSortSelect').addEventListener('change', (e) => {
+            currentSortOption = e.target.value;
+            renderTaskList();
+          });
+
+          document.querySelectorAll('.filter-pill').forEach(pill => {
+            pill.addEventListener('click', () => {
+              const filterType = pill.getAttribute('data-filter');
+              const filterVal = pill.getAttribute('data-value');
+
+              if (filterType === 'status') {
+                document.querySelectorAll('.filter-pill[data-filter="status"]').forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                currentFilterStatus = filterVal;
+              } else if (filterType === 'priority') {
+                if (pill.classList.contains('active')) {
+                  pill.classList.remove('active');
+                  currentFilterPriority = 'all';
+                } else {
+                  document.querySelectorAll('.filter-pill[data-filter="priority"]').forEach(p => p.classList.remove('active'));
+                  pill.classList.add('active');
+                  currentFilterPriority = filterVal;
+                }
+              }
+              renderTaskList();
+            });
+          });
+
+          // Planner Date Navigation
+          const plannerDatePicker = document.getElementById('plannerDatePicker');
+          plannerDatePicker.value = plannerSelectedDate;
+          plannerDatePicker.addEventListener('change', (e) => {
+            plannerSelectedDate = e.target.value;
+            renderPlanner();
+          });
+
+          document.getElementById('btnPlannerToday').addEventListener('click', () => {
+            plannerSelectedDate = todayStr;
+            plannerDatePicker.value = todayStr;
+            renderPlanner();
+          });
+
+          document.getElementById('btnPlannerPrevDay').addEventListener('click', () => {
+            const d = new Date(plannerSelectedDate + 'T00:00:00');
+            d.setDate(d.getDate() - 1);
+            plannerSelectedDate = d.toISOString().split('T')[0];
+            plannerDatePicker.value = plannerSelectedDate;
+            renderPlanner();
+          });
+
+          document.getElementById('btnPlannerNextDay').addEventListener('click', () => {
+            const d = new Date(plannerSelectedDate + 'T00:00:00');
+            d.setDate(d.getDate() + 1);
+            plannerSelectedDate = d.toISOString().split('T')[0];
+            plannerDatePicker.value = plannerSelectedDate;
+            renderPlanner();
+          });
+        }
+
+        // --- TASK CRUD LOGIC ---
+        function handleQuickAddTask() {
+          const titleInput = document.getElementById('quickTaskTitle');
+          const title = titleInput.value.trim();
+          if (!title) return;
+
+          const priority = document.getElementById('quickTaskPriority').value;
+          const category = document.getElementById('quickTaskCategory').value;
+          const dueDate = document.getElementById('quickTaskDate').value || todayStr;
+          const reminderTime = document.getElementById('quickTaskTime').value || '';
+
+          const newTask = {
+            id: 'task-' + Date.now(),
+            title,
+            description: '',
+            priority,
+            category,
+            dueDate,
+            reminderTime,
+            completed: false,
+            notified: false,
+            createdAt: Date.now()
+          };
+
+          tasks.unshift(newTask);
+          saveTasksToStorage();
+
+          titleInput.value = '';
+          document.getElementById('quickTaskTime').value = '';
+          
+          showToast(`Task added: "${newTask.title}"`, 'success');
+          renderAll();
+        }
+
+        function toggleTaskComplete(taskId) {
+          const task = tasks.find(t => t.id === taskId);
+          if (!task) return;
+
+          task.completed = !task.completed;
+          saveTasksToStorage();
+
+          if (task.completed) {
+            playHarmonicChime();
+            showToast(`Completed: "${task.title}"`, 'success');
+          }
+          renderAll();
+        }
+
+        function openTaskModal(taskId = null, prefillHour = null) {
+          const modalBackdrop = document.getElementById('taskModalBackdrop');
+          const modalTitle = document.getElementById('modalTitle');
+          const modalTaskId = document.getElementById('modalTaskId');
+          const modalTaskTitle = document.getElementById('modalTaskTitle');
+          const modalTaskDesc = document.getElementById('modalTaskDesc');
+          const modalTaskPriority = document.getElementById('modalTaskPriority');
+          const modalTaskCategory = document.getElementById('modalTaskCategory');
+          const modalTaskDate = document.getElementById('modalTaskDate');
+          const modalTaskTime = document.getElementById('modalTaskTime');
+
+          if (taskId) {
+            const task = tasks.find(t => t.id === taskId);
+            if (!task) return;
+            modalTitle.textContent = 'Edit Task';
+            modalTaskId.value = task.id;
+            modalTaskTitle.value = task.title;
+            modalTaskDesc.value = task.description || '';
+            modalTaskPriority.value = task.priority;
+            modalTaskCategory.value = task.category || 'Work';
+            modalTaskDate.value = task.dueDate || todayStr;
+            modalTaskTime.value = task.reminderTime || '';
+
+            // Update priority buttons
+            document.querySelectorAll('.priority-option-btn').forEach(btn => {
+              if (btn.getAttribute('data-priority') === task.priority) {
+                btn.classList.add('selected');
+              } else {
+                btn.classList.remove('selected');
+              }
+            });
+          } else {
+            modalTitle.textContent = 'New Task';
+            modalTaskId.value = '';
+            modalTaskTitle.value = '';
+            modalTaskDesc.value = '';
+            modalTaskPriority.value = 'medium';
+            modalTaskCategory.value = 'Work';
+            modalTaskDate.value = plannerSelectedDate || todayStr;
+            modalTaskTime.value = prefillHour ? `${String(prefillHour).padStart(2, '0')}:00` : '';
+
+            document.querySelectorAll('.priority-option-btn').forEach(btn => {
+              btn.classList.remove('selected');
+              if (btn.getAttribute('data-priority') === 'medium') btn.classList.add('selected');
+            });
+          }
+
+          modalBackdrop.classList.add('open');
+          modalTaskTitle.focus();
+        }
+
+        function closeTaskModal() {
+          document.getElementById('taskModalBackdrop').classList.remove('open');
+        }
+
+        function handleSaveModalTask(e) {
+          e.preventDefault();
+          const taskId = document.getElementById('modalTaskId').value;
+          const title = document.getElementById('modalTaskTitle').value.trim();
+          if (!title) return;
+
+          const desc = document.getElementById('modalTaskDesc').value.trim();
+          const priority = document.getElementById('modalTaskPriority').value;
+          const category = document.getElementById('modalTaskCategory').value;
+          const dueDate = document.getElementById('modalTaskDate').value || todayStr;
+          const reminderTime = document.getElementById('modalTaskTime').value || '';
+
+          if (taskId) {
+            // Edit existing
+            const task = tasks.find(t => t.id === taskId);
+            if (task) {
+              task.title = title;
+              task.description = desc;
+              task.priority = priority;
+              task.category = category;
+              task.dueDate = dueDate;
+              task.reminderTime = reminderTime;
+              task.notified = false; // Reset notification trigger if time modified
+              showToast('Task updated successfully', 'success');
+            }
+          } else {
+            // Create new
+            const newTask = {
+              id: 'task-' + Date.now(),
+              title,
+              description: desc,
+              priority,
+              category,
+              dueDate,
+              reminderTime,
+              completed: false,
+              notified: false,
+              createdAt: Date.now()
+            };
+            tasks.unshift(newTask);
+            showToast('New task created', 'success');
+          }
+
+          saveTasksToStorage();
+          closeTaskModal();
+          renderAll();
+        }
+
+        function promptDeleteTask(taskId) {
+          const task = tasks.find(t => t.id === taskId);
+          if (!task) return;
+
+          pendingDeleteId = taskId;
+          document.getElementById('deleteTaskTitle').textContent = `"${task.title}"`;
+          document.getElementById('deleteModalBackdrop').classList.add('open');
+        }
+
+        function closeDeleteModal() {
+          pendingDeleteId = null;
+          document.getElementById('deleteModalBackdrop').classList.remove('open');
+        }
+
+        function confirmDeleteTask() {
+          if (!pendingDeleteId) return;
+          const index = tasks.findIndex(t => t.id === pendingDeleteId);
+          if (index !== -1) {
+            lastDeletedTask = { ...tasks[index], index };
+            const title = tasks[index].title;
+            tasks.splice(index, 1);
+            saveTasksToStorage();
+
+            showUndoToast(`Deleted "${title}"`);
+          }
+          closeDeleteModal();
+          renderAll();
+        }
+
+        function undoDeleteTask() {
+          if (!lastDeletedTask) return;
+          tasks.splice(lastDeletedTask.index, 0, lastDeletedTask);
+          saveTasksToStorage();
+          showToast(`Restored "${lastDeletedTask.title}"`, 'success');
+          lastDeletedTask = null;
+          renderAll();
+        }
+
+        // --- INLINE EDITING LOGIC ---
+        function updateTaskTitleInline(taskId, newTitle) {
+          const task = tasks.find(t => t.id === taskId);
+          if (task && newTitle.trim()) {
+            task.title = newTitle.trim();
+            saveTasksToStorage();
+            renderBadgesAndHero();
+          }
+        }
+
+        function updateTaskDescInline(taskId, newDesc) {
+          const task = tasks.find(t => t.id === taskId);
+          if (task) {
+            task.description = newDesc.trim();
+            saveTasksToStorage();
+          }
+        }
+
+        // --- RENDER FUNCTIONS ---
+        function renderAll() {
+          renderBadgesAndHero();
+          renderTaskList();
+          if (currentView === 'planner') renderPlanner();
+          if (currentView === 'reminders') renderReminders();
+        }
+
+        function renderBadgesAndHero() {
+          const total = tasks.length;
+          const completed = tasks.filter(t => t.completed).length;
+          const high = tasks.filter(t => t.priority === 'high' && !t.completed).length;
+          const scheduledToday = tasks.filter(t => (t.dueDate === todayStr || !t.dueDate) && t.reminderTime).length;
+          const percent = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+          // Hero stats
+          document.getElementById('statTotalTasks').textContent = total;
+          document.getElementById('statCompletedTasks').textContent = completed;
+          document.getElementById('statHighPriority').textContent = high;
+          document.getElementById('statScheduledToday').textContent = scheduledToday;
+          document.getElementById('progressPercentageText').textContent = `${percent}%`;
+          document.getElementById('progressBarFill').style.width = `${percent}%`;
+
+          // Sidebar badges
+          document.getElementById('navTasksBadge').textContent = tasks.filter(t => !t.completed).length;
+          document.getElementById('navPlannerBadge').textContent = scheduledToday;
+          
+          const pendingReminders = tasks.filter(t => !t.completed && t.reminderTime).length;
+          document.getElementById('navRemindersBadge').textContent = pendingReminders;
+        }
+
+        function renderTaskList() {
+          const container = document.getElementById('taskListContainer');
+          if (!container) return;
+
+          // Filter
+          let filtered = tasks.filter(task => {
+            // Status filter
+            if (currentFilterStatus === 'active' && task.completed) return false;
+            if (currentFilterStatus === 'completed' && !task.completed) return false;
+
+            // Priority filter
+            if (currentFilterPriority !== 'all' && task.priority !== currentFilterPriority) return false;
+
+            // Search query
+            if (currentSearchQuery) {
+              const matchTitle = task.title.toLowerCase().includes(currentSearchQuery);
+              const matchDesc = (task.description || '').toLowerCase().includes(currentSearchQuery);
+              const matchCat = (task.category || '').toLowerCase().includes(currentSearchQuery);
+              if (!matchTitle && !matchDesc && !matchCat) return false;
+            }
+
+            return true;
+          });
+
+          // Sort
+          filtered.sort((a, b) => {
+            if (currentSortOption === 'time-asc') {
+              const timeA = a.reminderTime || '99:99';
+              const timeB = b.reminderTime || '99:99';
+              return timeA.localeCompare(timeB);
+            }
+            if (currentSortOption === 'priority-desc') {
+              const weight = { high: 3, medium: 2, low: 1 };
+              return (weight[b.priority] || 0) - (weight[a.priority] || 0);
+            }
+            if (currentSortOption === 'created-desc') {
+              return (b.createdAt || 0) - (a.createdAt || 0);
+            }
+            if (currentSortOption === 'title-asc') {
+              return a.title.localeCompare(b.title);
+            }
+            return 0;
+          });
+
+          if (filtered.length === 0) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <img 
+                  src="/src/assets/images/tasks_complete_badge_1791868747237.jpg" 
+                  alt="No tasks found" 
+                  referrerpolicy="no-referrer"
+                />
+                <h3>All Caught Up!</h3>
+                <p>No tasks match your current filter. Enjoy the peace of mind or add a new goal.</p>
+                <button class="btn-primary" onclick="window.chronoflow.openTaskModal()" style="margin-top: 0.5rem;">
+                  <i class="fa-solid fa-plus"></i> Add New Task
+                </button>
+              </div>
+            `;
+            return;
+          }
+
+          container.innerHTML = filtered.map(task => {
+            const isCompleted = task.completed;
+            const priorityClass = `priority-${task.priority}`;
+            const priorityBadge = `badge-${task.priority}`;
+            
+            return `
+              <div class="task-card ${priorityClass} ${isCompleted ? 'completed' : ''}" data-task-id="${task.id}">
+                <button 
+                  class="task-checkbox-btn" 
+                  title="${isCompleted ? 'Mark as incomplete' : 'Mark as complete'}"
+                  onclick="window.chronoflow.toggleTaskComplete('${task.id}')"
+                >
+                  <i class="${isCompleted ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'}"></i>
+                </button>
+
+                <div class="task-body">
+                  <div class="task-header-line">
+                    <span 
+                      class="task-title" 
+                      contenteditable="true" 
+                      spellcheck="false"
+                      title="Click to edit title directly"
+                      onblur="window.chronoflow.updateTaskTitleInline('${task.id}', this.innerText)"
+                      onkeydown="if(event.key==='Enter'){event.preventDefault(); this.blur();}"
+                    >${escapeHTML(task.title)}</span>
+
+                    <span class="badge ${priorityBadge}">${task.priority}</span>
+                    ${task.category ? `<span class="badge badge-cat"><i class="fa-solid fa-tag"></i> ${escapeHTML(task.category)}</span>` : ''}
+                    ${task.reminderTime ? `<span class="badge badge-time"><i class="fa-solid fa-clock"></i> ${task.reminderTime}</span>` : ''}
+                    ${task.dueDate ? `<span class="badge badge-date"><i class="fa-regular fa-calendar"></i> ${task.dueDate}</span>` : ''}
+                  </div>
+
+                  <div 
+                    class="task-desc" 
+                    contenteditable="true" 
+                    spellcheck="false"
+                    title="Click to edit notes directly"
+                    onblur="window.chronoflow.updateTaskDescInline('${task.id}', this.innerText)"
+                  >${escapeHTML(task.description || '')}</div>
+                </div>
+
+                <div class="task-actions">
+                  <button 
+                    class="action-icon-btn" 
+                    title="Edit task in modal" 
+                    onclick="window.chronoflow.openTaskModal('${task.id}')"
+                  >
+                    <i class="fa-solid fa-pen-to-square"></i>
+                  </button>
+                  <button 
+                    class="action-icon-btn btn-delete" 
+                    title="Delete task" 
+                    onclick="window.chronoflow.promptDeleteTask('${task.id}')"
+                  >
+                    <i class="fa-solid fa-trash-can"></i>
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // --- TIME-BLOCK PLANNER RENDER (06:00 to 23:00) ---
+        function renderPlanner() {
+          const container = document.getElementById('hourlySlotsContainer');
+          if (!container) return;
+
+          // Header title
+          const dateNavTitle = document.getElementById('plannerCurrentDateTitle');
+          const isToday = plannerSelectedDate === todayStr;
+          const dateObj = new Date(plannerSelectedDate + 'T00:00:00');
+          const dateFmt = dateObj.toLocaleDateString(undefined, { weekday: 'long', month: 'short', day: 'numeric' });
+          dateNavTitle.textContent = isToday ? `Today's Schedule (${dateFmt})` : `${dateFmt} Schedule`;
+
+          // Find tasks for selected date
+          const dayTasks = tasks.filter(t => (t.dueDate === plannerSelectedDate || (!t.dueDate && isToday)));
+
+          // Current time line calculation if today
+          const now = new Date();
+          const currentHour = now.getHours();
+          const currentMin = now.getMinutes();
+          const showTimeIndicator = isToday && currentHour >= 6 && currentHour <= 23;
+
+          let html = '';
+          const startHour = 6;
+          const endHour = 23;
+
+          for (let h = startHour; h <= endHour; h++) {
+            const hourStr = String(h).padStart(2, '0');
+            const displayTime = formatHour12(h);
+            const period = h < 12 ? 'AM' : 'PM';
+
+            // Tasks scheduled in this hour (e.g. 08:xx)
+            const slottedTasks = dayTasks.filter(t => {
+              if (!t.reminderTime) return false;
+              const taskHour = parseInt(t.reminderTime.split(':')[0], 10);
+              return taskHour === h;
+            });
+
+            // Sort slotted tasks by minute
+            slottedTasks.sort((a, b) => a.reminderTime.localeCompare(b.reminderTime));
+
+            html += `
+              <div class="hour-block" data-hour="${h}">
+                <div class="hour-label-col">
+                  <span class="hour-label-time">${displayTime}</span>
+                  <span class="hour-label-period">${period}</span>
+                </div>
+                <div class="hour-tasks-col">
+                  ${slottedTasks.map(task => `
+                    <div 
+                      class="slotted-task-chip ${task.completed ? 'completed' : ''}" 
+                      onclick="window.chronoflow.openTaskModal('${task.id}')"
+                      title="${task.completed ? 'Completed' : 'Click to edit task'}"
+                    >
+                      <button 
+                        class="task-checkbox-btn" 
+                        style="padding:0; font-size: 1rem; margin: 0;"
+                        onclick="event.stopPropagation(); window.chronoflow.toggleTaskComplete('${task.id}');"
+                      >
+                        <i class="${task.completed ? 'fa-solid fa-circle-check text-emerald' : 'fa-regular fa-circle'}"></i>
+                      </button>
+                      <span class="slotted-time-tag">${task.reminderTime}</span>
+                      <span>${escapeHTML(task.title)}</span>
+                    </div>
+                  `).join('')}
+
+                  <button 
+                    class="hour-add-btn" 
+                    onclick="window.chronoflow.openTaskModal(null, ${h})"
+                    title="Add task at ${displayTime}"
+                  >
+                    <i class="fa-solid fa-plus"></i> Block ${displayTime}
+                  </button>
+                </div>
+              </div>
+            `;
+          }
+
+          container.innerHTML = html;
+
+          // Inject Current Time Line if viewing today
+          if (showTimeIndicator) {
+            const hourOffsetIndex = currentHour - startHour;
+            const hourHeight = 82; // standard min-height of hour block
+            const minuteFraction = currentMin / 60;
+            const topPosition = (hourOffsetIndex * hourHeight) + (minuteFraction * hourHeight);
+
+            const indicator = document.createElement('div');
+            indicator.className = 'current-time-indicator';
+            indicator.style.top = `${topPosition}px`;
+            indicator.innerHTML = `<div class="current-time-dot"></div>`;
+            container.appendChild(indicator);
+          }
+        }
+
+        function formatHour12(h) {
+          const hour12 = h % 12 === 0 ? 12 : h % 12;
+          return `${String(hour12).padStart(2, '0')}:00`;
+        }
+
+        // --- UPCOMING REMINDERS RENDER ---
+        function renderReminders() {
+          const container = document.getElementById('remindersListContainer');
+          if (!container) return;
+
+          // All tasks with reminder times
+          const reminderTasks = tasks.filter(t => t.reminderTime && !t.completed);
+          
+          reminderTasks.sort((a, b) => {
+            const dateA = a.dueDate || todayStr;
+            const dateB = b.dueDate || todayStr;
+            if (dateA !== dateB) return dateA.localeCompare(dateB);
+            return a.reminderTime.localeCompare(b.reminderTime);
+          });
+
+          if (reminderTasks.length === 0) {
+            container.innerHTML = `
+              <div class="empty-state">
+                <img 
+                  src="/src/assets/images/tasks_complete_badge_1791868747237.jpg" 
+                  alt="No active reminders" 
+                  referrerpolicy="no-referrer"
+                />
+                <h3>No Pending Reminders</h3>
+                <p>All scheduled reminders are checked off or no reminder times have been set yet.</p>
+                <button class="btn-primary" onclick="window.chronoflow.openTaskModal()" style="margin-top: 0.5rem;">
+                  <i class="fa-solid fa-plus"></i> Schedule New Reminder
+                </button>
+              </div>
+            `;
+            return;
+          }
+
+          const now = new Date();
+          const currentYMD = getTodayISOString();
+          const currentHour = now.getHours();
+          const currentMin = now.getMinutes();
+
+          container.innerHTML = reminderTasks.map(task => {
+            const isToday = (task.dueDate || currentYMD) === currentYMD;
+            const taskHour = parseInt(task.reminderTime.split(':')[0], 10);
+            const taskMin = parseInt(task.reminderTime.split(':')[1], 10);
+
+            let statusLabel = '';
+            let isOverdue = false;
+
+            if (isToday) {
+              const diffMinutes = (taskHour * 60 + taskMin) - (currentHour * 60 + currentMin);
+              if (diffMinutes < 0) {
+                statusLabel = `Passed (${Math.abs(diffMinutes)}m ago)`;
+                isOverdue = true;
+              } else if (diffMinutes === 0) {
+                statusLabel = 'Due right now!';
+              } else if (diffMinutes < 60) {
+                statusLabel = `In ${diffMinutes} mins`;
+              } else {
+                const hoursLeft = Math.floor(diffMinutes / 60);
+                const minsRemainder = diffMinutes % 60;
+                statusLabel = `In ${hoursLeft}h ${minsRemainder}m`;
+              }
+            } else {
+              statusLabel = `Scheduled for ${task.dueDate}`;
+            }
+
+            return `
+              <div class="reminder-card">
+                <div class="reminder-left">
+                  <button 
+                    class="task-checkbox-btn" 
+                    title="Mark complete"
+                    onclick="window.chronoflow.toggleTaskComplete('${task.id}')"
+                  >
+                    <i class="fa-regular fa-circle"></i>
+                  </button>
+                  <div>
+                    <h4 style="font-size: 0.98rem; font-weight: 700;">${escapeHTML(task.title)}</h4>
+                    <p style="font-size: 0.82rem; color: var(--text-secondary); margin-top: 0.2rem;">
+                      ${task.description ? escapeHTML(task.description) : 'No additional notes'}
+                    </p>
+                  </div>
+                </div>
+
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <span class="reminder-countdown-badge ${isOverdue ? 'overdue' : ''}">
+                    <i class="fa-solid fa-clock"></i> ${task.reminderTime} &bull; ${statusLabel}
+                  </span>
+                  <button 
+                    class="btn-secondary" 
+                    style="padding: 0.4rem 0.75rem; font-size: 0.8rem;"
+                    onclick="window.chronoflow.openTaskModal('${task.id}')"
+                  >
+                    Edit
+                  </button>
+                </div>
+              </div>
+            `;
+          }).join('');
+        }
+
+        // --- TOAST NOTIFICATIONS & UNDO ---
+        function showToast(message, type = 'info', taskId = null) {
+          const container = document.getElementById('toastContainer');
+          if (!container) return;
+
+          const toast = document.createElement('div');
+          toast.className = `toast-item ${type === 'reminder' ? 'toast-alert' : ''}`;
+          
+          let icon = 'fa-circle-info';
+          if (type === 'success') icon = 'fa-circle-check text-emerald';
+          if (type === 'reminder') icon = 'fa-bell text-primary sound-pulse';
+          if (type === 'warning') icon = 'fa-triangle-exclamation text-amber';
+
+          toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <i class="fa-solid ${icon}"></i>
+              <span style="font-size: 0.88rem; font-weight: 600;">${escapeHTML(message)}</span>
+            </div>
+            ${taskId ? `
+              <button class="toast-btn" onclick="window.chronoflow.openTaskModal('${taskId}')">View</button>
+            ` : ''}
+          `;
+
+          container.appendChild(toast);
+
+          setTimeout(() => {
+            toast.style.opacity = '0';
+            toast.style.transform = 'translateY(10px)';
+            toast.style.transition = 'all 0.3s ease';
+            setTimeout(() => toast.remove(), 300);
+          }, 4500);
+        }
+
+        function showUndoToast(message) {
+          const container = document.getElementById('toastContainer');
+          if (!container) return;
+
+          const toast = document.createElement('div');
+          toast.className = 'toast-item';
+          toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 0.75rem;">
+              <i class="fa-solid fa-trash-can" style="color: var(--accent-rose);"></i>
+              <span style="font-size: 0.88rem; font-weight: 600;">${escapeHTML(message)}</span>
+            </div>
+            <button class="toast-btn" style="background: var(--primary); color: #fff;" onclick="window.chronoflow.undoDeleteTask(); this.closest('.toast-item').remove();">
+              Undo
+            </button>
+          `;
+
+          container.appendChild(toast);
+
+          setTimeout(() => {
+            if (toast.parentNode) {
+              toast.style.opacity = '0';
+              toast.style.transform = 'translateY(10px)';
+              toast.style.transition = 'all 0.3s ease';
+              setTimeout(() => toast.remove(), 300);
+            }
+          }, 6000);
+        }
+
+        // --- UTILITY ---
+        function escapeHTML(str) {
+          if (!str) return '';
+          return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+        }
+
+        // Expose public API for inline HTML onclick handlers
+        window.chronoflow = {
+          toggleTaskComplete,
+          openTaskModal,
+          promptDeleteTask,
+          undoDeleteTask,
+          updateTaskTitleInline,
+          updateTaskDescInline
+        };
+      })();
+    </script>
+  </body>
+</html>

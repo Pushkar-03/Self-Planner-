@@ -1,0 +1,6 @@
+{
+  "name": "Chronoflow Planner & To-Do",
+  "description": "A modern, aesthetic To-Do List and Daily Time-Block Planner with custom reminders, hourly scheduling, and persistent local storage.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
